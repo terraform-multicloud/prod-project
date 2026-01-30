@@ -92,3 +92,23 @@ resource "aws_security_group" "vpc-sg-backend" {
         security_groups = [aws_security_group.vpc-sg-frontend.id]
     }
 }
+resource "aws_eip" "nat-eip" {
+    # vpc = true
+    tags = {
+        Name = "${var.vpc_name}-nat-eip"
+    }
+  
+}
+
+resource "aws_nat_gateway" "vpc-nat" {
+   allocation_id = aws_eip.nat-eip.id
+   subnet_id = aws_subnet.pub-subnets[0].id
+   tags = {
+       Name = "${var.vpc_name}-nat-gateway"
+   }
+}
+resource "aws_route" "nat-route" {
+    route_table_id = aws_route_table.pvt-rt.id
+    destination_cidr_block = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.vpc-nat.id
+}
