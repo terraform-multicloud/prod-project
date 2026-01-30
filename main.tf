@@ -55,7 +55,7 @@ resource "aws_route_table_association" "pvt-rt-association" {
     route_table_id = aws_route_table.pvt-rt.id
   
 }
-resource "aws_security_group" "vpc-sg-frotend" {
+resource "aws_security_group" "vpc-sg-frontend" {
     name       = "${var.vpc_name}-sg-frontend"
     description = "Security group for frontend servers"
     vpc_id      = aws_vpc.vpc.id
@@ -71,5 +71,24 @@ resource "aws_security_group" "vpc-sg-frotend" {
         to_port     = 0
         protocol    = "-1"
         cidr_blocks = ["0.0.0.0/0"]
+    }
+}
+resource "aws_security_group" "vpc-sg-backend" {
+    name       = "${var.vpc_name}-sg-backend"
+    description = "Security group for backend servers"
+    vpc_id      = aws_vpc.vpc.id
+
+    ingress {
+        from_port   = 3306
+        to_port     = 3306
+        protocol    = "tcp"
+        security_groups = [aws_security_group.vpc-sg-frontend.id]
+        
+    }   
+    egress {
+        from_port   = 0
+        to_port     = 0
+        protocol    = "-1"
+        security_groups = [aws_security_group.vpc-sg-frontend.id]
     }
 }
